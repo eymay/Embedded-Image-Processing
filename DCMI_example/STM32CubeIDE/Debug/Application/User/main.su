@@ -1,0 +1,7 @@
+C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/main.c:71:5:main	16	static
+C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/main.c:124:6:SystemClock_Config	88	static
+C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/main.c:165:13:MX_DCMI_Init	8	static
+C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/main.c:198:13:MX_I2C1_Init	8	static
+C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/main.c:230:13:MX_DMA_Init	16	static
+C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/main.c:248:13:MX_GPIO_Init	48	static
+C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/main.c:276:6:Error_Handler	4	static,ignoring_inline_asm
