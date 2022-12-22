@@ -1135,7 +1135,7 @@ void setup(){
 
   setColor();
 
- writeReg(0x11, 10); //Earlier it had the value:writeReg(0x11, 12); New version works better for me :) !!!!
+ writeReg(0x11, 31); //Earlier it had the value:writeReg(0x11, 12); New version works better for me :) !!!!
 
 }
 
