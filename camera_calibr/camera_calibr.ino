@@ -1030,7 +1030,7 @@ void arduinoUnoInut(void) {
 
   TCCR2B = (1 << WGM22) | (1 << CS20);
 
-  OCR2A = 0;//(F_CPU)/(2*(X+1))
+  OCR2A = 2;//(F_CPU)/(2*(X+1))
 
   DDRC &= ~15;//low d0-d3 camera
 
