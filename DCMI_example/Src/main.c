@@ -52,6 +52,7 @@ DMA_HandleTypeDef hdma_usart2_tx;
 
 
 uint8_t frameBuffer[15534] = { 0 };
+ushort mutex = 0;
 uint16_t bufferPointer = 0;
 ushort headerFound = 0;
 
@@ -139,6 +140,45 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  if (HAL_GPIO_ReadPin(USER_Btn_GPIO_Port, USER_Btn_Pin)) {
+	  			if (mutex == 1) {
+	  				memset(frameBuffer, 0, sizeof frameBuffer);
+	  				OV2640_CaptureSnapshot((uint32_t) frameBuffer, imgRes);
+
+	  				while (1) {
+	  					if (headerFound == 0 && frameBuffer[bufferPointer] == 0xFF
+	  							&& frameBuffer[bufferPointer + 1] == 0xD8) {
+	  						headerFound = 1;
+	  					#ifdef DEBUG
+	  						my_printf("Found header of JPEG file \r\n");
+	  					#endif
+	  					}
+	  					if (headerFound == 1 && frameBuffer[bufferPointer] == 0xFF
+	  							&& frameBuffer[bufferPointer + 1] == 0xD9) {
+	  						bufferPointer = bufferPointer + 2;
+	  					#ifdef DEBUG
+	  						my_printf("Found EOF of JPEG file \r\n");
+	  						#endif
+	  						headerFound = 0;
+	  						break;
+	  					}
+
+	  					if (bufferPointer >= 65535) {
+	  						break;
+	  					}
+	  					bufferPointer++;
+	  				}
+	  					#ifdef DEBUG
+	  						my_printf("Image size: %d bytes \r\n",bufferPointer);
+	  					#endif
+
+	  				HAL_UART_Transmit_DMA(&huart3, frameBuffer, bufferPointer); //Use of DMA may be necessary for larger data streams.
+	  				bufferPointer = 0;
+	  				mutex = 0;
+	  			}
+	  		} else {
+	  			mutex = 1;
+	  		}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
