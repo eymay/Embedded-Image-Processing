@@ -57,7 +57,16 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define BTN_Pin GPIO_PIN_0
+#define BTN_GPIO_Port GPIOA
+#define CAMERA_RESET_Pin GPIO_PIN_7
+#define CAMERA_RESET_GPIO_Port GPIOE
+#define CAMERA_PWDN_Pin GPIO_PIN_8
+#define CAMERA_PWDN_GPIO_Port GPIOE
+#define DCMI_XCLK_Pin GPIO_PIN_8
+#define DCMI_XCLK_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
+
 
 /* USER CODE END Private defines */
 
