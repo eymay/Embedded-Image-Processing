@@ -35,7 +35,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define FRAME_BUFFER 0x30000000
+#define FRAME_BUFFER 0xF0000000
 
 /* USER CODE END PM */
 
@@ -45,7 +45,15 @@ DMA_HandleTypeDef hdma_dcmi;
 
 I2C_HandleTypeDef hi2c1;
 
+UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_tx;
+
 /* USER CODE BEGIN PV */
+
+
+uint8_t frameBuffer[15534] = { 0 };
+uint16_t bufferPointer = 0;
+ushort headerFound = 0;
 
 /* USER CODE END PV */
 
@@ -55,13 +63,28 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_DCMI_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void vprint(const char *fmt, va_list argp) {
+	char string[200];
+	if (0 < vsprintf(string, fmt, argp)) // build string
+			{
+		HAL_UART_Transmit(&huart3, (uint8_t*) string, strlen(string), 0xffffff); // send message via UART
+	}
+}
 
+void my_printf(const char *fmt, ...) // custom printf() function
+{
+	va_list argp;
+	va_start(argp, fmt);
+	vprint(fmt, argp);
+	va_end(argp);
+}
 /* USER CODE END 0 */
 
 /**
@@ -96,14 +119,20 @@ int main(void)
   MX_DMA_Init();
   MX_DCMI_Init();
   MX_I2C1_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  OV2640_Init(&hi2c1, &hdcmi);
+  	HAL_Delay(10);
+  	OV2640_ResolutionOptions(imgRes);
+  	HAL_Delay(10);
+  	/*
   uint32_t frame_size = 0x9600;
   	int buff_size;
   	buff_size = frame_size *3;
   	//volatile uint32_t dma_buff[buff_size];
   	__HAL_DCMI_ENABLE_IT(&hdcmi, DCMI_IT_FRAME);
   	HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t)FRAME_BUFFER, frame_size);
-
+	*/
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -174,12 +203,12 @@ static void MX_DCMI_Init(void)
   /* USER CODE END DCMI_Init 1 */
   hdcmi.Instance = DCMI;
   hdcmi.Init.SynchroMode = DCMI_SYNCHRO_HARDWARE;
-  hdcmi.Init.PCKPolarity = DCMI_PCKPOLARITY_FALLING;
+  hdcmi.Init.PCKPolarity = DCMI_PCKPOLARITY_RISING;
   hdcmi.Init.VSPolarity = DCMI_VSPOLARITY_LOW;
-  hdcmi.Init.HSPolarity = DCMI_HSPOLARITY_HIGH;
+  hdcmi.Init.HSPolarity = DCMI_HSPOLARITY_LOW;
   hdcmi.Init.CaptureRate = DCMI_CR_ALL_FRAME;
   hdcmi.Init.ExtendedDataMode = DCMI_EXTEND_DATA_8B;
-  hdcmi.Init.JPEGMode = DCMI_JPEG_DISABLE;
+  hdcmi.Init.JPEGMode = DCMI_JPEG_ENABLE;
   if (HAL_DCMI_Init(&hdcmi) != HAL_OK)
   {
     Error_Handler();
@@ -225,6 +254,39 @@ static void MX_I2C1_Init(void)
 }
 
 /**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
   * Enable DMA controller clock
   */
 static void MX_DMA_Init(void)
@@ -232,8 +294,12 @@ static void MX_DMA_Init(void)
 
   /* DMA controller clock enable */
   __HAL_RCC_DMA2_CLK_ENABLE();
+  __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* DMA interrupt init */
+  /* DMA1_Stream6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
   /* DMA2_Stream1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);

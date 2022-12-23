@@ -512,7 +512,7 @@ int main(void)
  800055c:	60da      	str	r2, [r3, #12]
   	HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t)FRAME_BUFFER, frame_size);
  800055e:	687b      	ldr	r3, [r7, #4]
- 8000560:	f04f 5240 	mov.w	r2, #805306368	; 0x30000000
+ 8000560:	f04f 4270 	mov.w	r2, #4026531840	; 0xf0000000
  8000564:	2102      	movs	r1, #2
  8000566:	4802      	ldr	r0, [pc, #8]	; (8000570 <main+0x50>)
  8000568:	f000 fc74 	bl	8000e54 <HAL_DCMI_Start_DMA>
