@@ -125,9 +125,9 @@ int main(void)
   MX_I2C1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  OV2640_Init(&hi2c1, &hdcmi);
+  OV7670_Init(&hi2c1, &hdcmi);
   	HAL_Delay(10);
-  	OV2640_ResolutionOptions(imgRes);
+  	OV7670_ResolutionOptions(imgRes);
   	HAL_Delay(10);
   	/*
   uint32_t frame_size = 0x9600;
@@ -147,10 +147,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if (HAL_GPIO_ReadPin(USER_Btn_GPIO_Port, USER_Btn_Pin)) {
+	  if (HAL_GPIO_ReadPin(BTN_GPIO_Port, BTN_Pin)) {
 	  			if (mutex == 1) {
 	  				memset(frameBuffer, 0, sizeof frameBuffer);
-	  				OV2640_CaptureSnapshot((uint32_t) frameBuffer, imgRes);
+	  				OV7670_CaptureSnapshot((uint32_t) frameBuffer, imgRes);
 
 	  				while (1) {
 	  					if (headerFound == 0 && frameBuffer[bufferPointer] == 0xFF
