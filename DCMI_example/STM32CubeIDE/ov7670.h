@@ -2,7 +2,7 @@
 #define OV7670_H_
 
 #include "main.h"
-#include "stm32f7xx.h"
+#include "stm32f4xx.h"
 
 
 

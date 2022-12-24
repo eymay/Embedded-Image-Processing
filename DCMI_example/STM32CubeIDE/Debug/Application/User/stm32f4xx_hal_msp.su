@@ -1,5 +1,7 @@
-C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/stm32f4xx_hal_msp.c:64:6:HAL_MspInit	16	static
-C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/stm32f4xx_hal_msp.c:86:6:HAL_DCMI_MspInit	56	static
-C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/stm32f4xx_hal_msp.c:180:6:HAL_DCMI_MspDeInit	16	static
-C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/stm32f4xx_hal_msp.c:229:6:HAL_I2C_MspInit	48	static
-C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/stm32f4xx_hal_msp.c:265:6:HAL_I2C_MspDeInit	16	static
+C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/stm32f4xx_hal_msp.c:66:6:HAL_MspInit	16	static
+C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/stm32f4xx_hal_msp.c:88:6:HAL_DCMI_MspInit	56	static
+C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/stm32f4xx_hal_msp.c:182:6:HAL_DCMI_MspDeInit	16	static
+C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/stm32f4xx_hal_msp.c:231:6:HAL_I2C_MspInit	48	static
+C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/stm32f4xx_hal_msp.c:267:6:HAL_I2C_MspDeInit	16	static
+C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/stm32f4xx_hal_msp.c:298:6:HAL_UART_MspInit	48	static
+C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Src/stm32f4xx_hal_msp.c:359:6:HAL_UART_MspDeInit	16	static

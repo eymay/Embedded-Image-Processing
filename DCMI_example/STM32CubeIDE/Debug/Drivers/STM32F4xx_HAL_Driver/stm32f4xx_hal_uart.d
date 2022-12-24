@@ -1,5 +1,5 @@
-Drivers/STM32F4xx_HAL_Driver/stm32f4xx_hal_exti.o: \
- C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c \
+Drivers/STM32F4xx_HAL_Driver/stm32f4xx_hal_uart.o: \
+ C:/Users/eymen/CodesPrograms/Embedded/Embedded-Image-Processing/DCMI_example/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c \
  ../../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../../Inc/stm32f4xx_hal_conf.h \
  ../../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \

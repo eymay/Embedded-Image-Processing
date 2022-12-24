@@ -78,7 +78,7 @@ void vprint(const char *fmt, va_list argp) {
 	char string[200];
 	if (0 < vsprintf(string, fmt, argp)) // build string
 			{
-		HAL_UART_Transmit(&huart3, (uint8_t*) string, strlen(string), 0xffffff); // send message via UART
+		HAL_UART_Transmit(&huart2, (uint8_t*) string, strlen(string), 0xffffff); // send message via UART
 	}
 }
 
@@ -127,7 +127,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   OV7670_Init(&hi2c1, &hdcmi);
   	HAL_Delay(10);
-  	OV7670_ResolutionOptions(imgRes);
+  	OV7670_ResolutionOptions(15534);
   	HAL_Delay(10);
   	/*
   uint32_t frame_size = 0x9600;
@@ -150,7 +150,7 @@ int main(void)
 	  if (HAL_GPIO_ReadPin(BTN_GPIO_Port, BTN_Pin)) {
 	  			if (mutex == 1) {
 	  				memset(frameBuffer, 0, sizeof frameBuffer);
-	  				OV7670_CaptureSnapshot((uint32_t) frameBuffer, imgRes);
+	  				OV7670_CaptureSnapshot((uint32_t) frameBuffer, 15534);
 
 	  				while (1) {
 	  					if (headerFound == 0 && frameBuffer[bufferPointer] == 0xFF
@@ -179,7 +179,7 @@ int main(void)
 	  						my_printf("Image size: %d bytes \r\n",bufferPointer);
 	  					#endif
 
-	  				HAL_UART_Transmit_DMA(&huart3, frameBuffer, bufferPointer); //Use of DMA may be necessary for larger data streams.
+	  				HAL_UART_Transmit_DMA(&huart2, frameBuffer, bufferPointer); //Use of DMA may be necessary for larger data streams.
 	  				bufferPointer = 0;
 	  				mutex = 0;
 	  			}
