@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "libjpeg.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -128,6 +129,7 @@ int main(void)
   MX_DCMI_Init();
   MX_I2C1_Init();
   MX_USART2_UART_Init();
+  MX_LIBJPEG_Init();
   /* USER CODE BEGIN 2 */
   OV7670_Init(&hi2c1, &hdcmi);
   	HAL_Delay(100);
