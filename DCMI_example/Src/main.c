@@ -54,7 +54,7 @@ DMA_HandleTypeDef hdma_usart2_tx;
 /* USER CODE BEGIN PV */
 
 
-uint8_t frameBuffer[15534] = { 0 };
+uint8_t frameBuffer[15000] = { 0 };
 ushort mutex = 0;
 uint16_t bufferPointer = 0;
 ushort headerFound = 0;
@@ -63,6 +63,7 @@ ushort headerFound = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void PeriphCommonClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_DCMI_Init(void);
@@ -114,6 +115,9 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
+/* Configure the peripherals common clocks */
+  PeriphCommonClock_Config();
+
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
@@ -126,9 +130,9 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   OV7670_Init(&hi2c1, &hdcmi);
-  	HAL_Delay(10);
+  	HAL_Delay(100);
   	OV7670_ResolutionOptions(15534);
-  	HAL_Delay(10);
+  	HAL_Delay(100);
   	/*
   uint32_t frame_size = 0x9600;
   	int buff_size;
@@ -150,8 +154,13 @@ int main(void)
 	  if (HAL_GPIO_ReadPin(BTN_GPIO_Port, BTN_Pin)) {
 	  			if (mutex == 1) {
 	  				memset(frameBuffer, 0, sizeof frameBuffer);
-	  				OV7670_CaptureSnapshot((uint32_t) frameBuffer, 15534);
-
+	  				OV7670_CaptureSnapshot((uint32_t) frameBuffer, 12672); // QCIF 176*144 /2 //OV7670_QVGA_WIDTH * OV7670_QVGA_HEIGHT/2
+	  				//HAL_Delay(10000);
+	  				/*
+	  				for(int i = 0; i < 11535; i++){
+	  					bufferPointer++;
+	  				}*/
+	  				/*
 	  				while (1) {
 	  					if (headerFound == 0 && frameBuffer[bufferPointer] == 0xFF
 	  							&& frameBuffer[bufferPointer + 1] == 0xD8) {
@@ -174,12 +183,12 @@ int main(void)
 	  						break;
 	  					}
 	  					bufferPointer++;
-	  				}
+	  				}*/
 	  					#ifdef DEBUG
 	  						my_printf("Image size: %d bytes \r\n",bufferPointer);
 	  					#endif
 
-	  				HAL_UART_Transmit_DMA(&huart2, frameBuffer, bufferPointer); //Use of DMA may be necessary for larger data streams.
+	  				HAL_UART_Transmit_DMA(&huart2, frameBuffer, 15000); //Use of DMA may be necessary for larger data streams.
 	  				bufferPointer = 0;
 	  				mutex = 0;
 	  			}
@@ -202,6 +211,12 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
+  /** Macro to configure the PLL multiplication factor
+  */
+  __HAL_RCC_PLL_PLLM_CONFIG(8);
+  /** Macro to configure the PLL clock source
+  */
+  __HAL_RCC_PLL_PLLSOURCE_CONFIG(RCC_PLLSOURCE_HSI);
   /** Configure the main internal regulator output voltage
   */
   __HAL_RCC_PWR_CLK_ENABLE();
@@ -213,6 +228,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -231,6 +247,26 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSI, RCC_MCODIV_1);
+  HAL_RCC_MCOConfig(RCC_MCO2, RCC_MCO2SOURCE_PLLI2SCLK, RCC_MCODIV_5);
+}
+
+/**
+  * @brief Peripherals Common Clock Configuration
+  * @retval None
+  */
+void PeriphCommonClock_Config(void)
+{
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+
+  /** Initializes the peripherals clock
+  */
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_PLLI2S;
+  PeriphClkInitStruct.PLLI2S.PLLI2SN = 192;
+  PeriphClkInitStruct.PLLI2S.PLLI2SR = 2;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /**
@@ -251,11 +287,11 @@ static void MX_DCMI_Init(void)
   hdcmi.Instance = DCMI;
   hdcmi.Init.SynchroMode = DCMI_SYNCHRO_HARDWARE;
   hdcmi.Init.PCKPolarity = DCMI_PCKPOLARITY_RISING;
-  hdcmi.Init.VSPolarity = DCMI_VSPOLARITY_LOW;
+  hdcmi.Init.VSPolarity = DCMI_VSPOLARITY_HIGH;
   hdcmi.Init.HSPolarity = DCMI_HSPOLARITY_LOW;
   hdcmi.Init.CaptureRate = DCMI_CR_ALL_FRAME;
   hdcmi.Init.ExtendedDataMode = DCMI_EXTEND_DATA_8B;
-  hdcmi.Init.JPEGMode = DCMI_JPEG_ENABLE;
+  hdcmi.Init.JPEGMode = DCMI_JPEG_DISABLE;
   if (HAL_DCMI_Init(&hdcmi) != HAL_OK)
   {
     Error_Handler();
@@ -369,6 +405,9 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(CAMERA_RESET_GPIO_Port, CAMERA_RESET_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(CAMERA_PWDN_GPIO_Port, CAMERA_PWDN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : BTN_Pin */
@@ -379,8 +418,9 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : CAMERA_RESET_Pin */
   GPIO_InitStruct.Pin = CAMERA_RESET_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(CAMERA_RESET_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : CAMERA_PWDN_Pin */
@@ -397,6 +437,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   GPIO_InitStruct.Alternate = GPIO_AF0_MCO;
   HAL_GPIO_Init(DCMI_XCLK_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA8 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF0_MCO;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 }
 

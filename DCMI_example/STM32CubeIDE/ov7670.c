@@ -6,7 +6,124 @@ I2C_HandleTypeDef *phi2c;
 DCMI_HandleTypeDef *phdcmi;
 UART_HandleTypeDef *phuart;
 
+const unsigned char OV7670_JPEG_INIT[][2] = {
+		{ REG_COM7, COM7_RESET },
+		/*
+		 * Clock scale: 3 = 15fps
+		 *              2 = 20fps
+		 *              1 = 30fps
+		 */
+			{ REG_CLKRC, 0x1 },	/* OV: clock scale (30 fps) */
+			{ REG_TSLB,  0x04 },	/* OV */
+			{ REG_COM7, 0x08 },	/*-VGA  -QVGA 0x10 now QCIF*/
+			/*
+			 * Set the hardware window.  These values from OV don't entirely
+			 * make sense - hstop is less than hstart.  But they work...
+			 */
+			{ REG_HSTART, 0x13 },	{ REG_HSTOP, 0x01 },
+			{ REG_HREF, 0xb6 },	{ REG_VSTART, 0x02 },
+			{ REG_VSTOP, 0x7a },	{ REG_VREF, 0x0a },
 
+			{ REG_COM3, 0 },	{ REG_COM14, 0 },
+			/* Mystery scaling numbers */
+			{ REG_SCALING_XSC, 0x3a },
+			{ REG_SCALING_YSC, 0x35 },
+			{ 0x72, 0x11 },		{ 0x73, 0xf0 },
+			{ 0xa2, 0x02 },		{ REG_COM10, 0x0 },
+
+			/* Gamma curve values */
+			{ 0x7a, 0x20 },		{ 0x7b, 0x10 },
+			{ 0x7c, 0x1e },		{ 0x7d, 0x35 },
+			{ 0x7e, 0x5a },		{ 0x7f, 0x69 },
+			{ 0x80, 0x76 },		{ 0x81, 0x80 },
+			{ 0x82, 0x88 },		{ 0x83, 0x8f },
+			{ 0x84, 0x96 },		{ 0x85, 0xa3 },
+			{ 0x86, 0xaf },		{ 0x87, 0xc4 },
+			{ 0x88, 0xd7 },		{ 0x89, 0xe8 },
+
+			/* AGC and AEC parameters.  Note we start by disabling those features,
+			   then turn them only after tweaking the values. */
+			{ REG_COM8, COM8_FASTAEC | COM8_AECSTEP | COM8_BFILT },
+			{ REG_GAIN, 0 },	{ REG_AECH, 0 },
+			{ REG_COM4, 0x40 }, /* magic reserved bit */
+			{ REG_COM9, 0x18 }, /* 4x gain + magic rsvd bit */
+			{ REG_BD50MAX, 0x05 },	{ REG_BD60MAX, 0x07 },
+			{ REG_AEW, 0x95 },	{ REG_AEB, 0x33 },
+			{ REG_VPT, 0xe3 },	{ REG_HAECC1, 0x78 },
+			{ REG_HAECC2, 0x68 },	{ 0xa1, 0x03 }, /* magic */
+			{ REG_HAECC3, 0xd8 },	{ REG_HAECC4, 0xd8 },
+			{ REG_HAECC5, 0xf0 },	{ REG_HAECC6, 0x90 },
+			{ REG_HAECC7, 0x94 },
+			{ REG_COM8, COM8_FASTAEC|COM8_AECSTEP|COM8_BFILT|COM8_AGC|COM8_AEC },
+
+			/* Almost all of these are magic "reserved" values.  */
+			{ REG_COM5, 0x61 },	{ REG_COM6, 0x4b },
+			{ 0x16, 0x02 },		{ REG_MVFP, 0x07 },
+			{ 0x21, 0x02 },		{ 0x22, 0x91 },
+			{ 0x29, 0x07 },		{ 0x33, 0x0b },
+			{ 0x35, 0x0b },		{ 0x37, 0x1d },
+			{ 0x38, 0x71 },		{ 0x39, 0x2a },
+			{ REG_COM12, 0x78 },	{ 0x4d, 0x40 },
+			{ 0x4e, 0x20 },		{ REG_GFIX, 0 },
+			{ 0x6b, 0x4a },		{ 0x74, 0x10 },
+			{ 0x8d, 0x4f },		{ 0x8e, 0 },
+			{ 0x8f, 0 },		{ 0x90, 0 },
+			{ 0x91, 0 },		{ 0x96, 0 },
+			{ 0x9a, 0 },		{ 0xb0, 0x84 },
+			{ 0xb1, 0x0c },		{ 0xb2, 0x0e },
+			{ 0xb3, 0x82 },		{ 0xb8, 0x0a },
+
+			/* More reserved magic, some of which tweaks white balance */
+			{ 0x43, 0x0a },		{ 0x44, 0xf0 },
+			{ 0x45, 0x34 },		{ 0x46, 0x58 },
+			{ 0x47, 0x28 },		{ 0x48, 0x3a },
+			{ 0x59, 0x88 },		{ 0x5a, 0x88 },
+			{ 0x5b, 0x44 },		{ 0x5c, 0x67 },
+			{ 0x5d, 0x49 },		{ 0x5e, 0x0e },
+			{ 0x6c, 0x0a },		{ 0x6d, 0x55 },
+			{ 0x6e, 0x11 },		{ 0x6f, 0x9f }, /* "9e for advance AWB" */
+			{ 0x6a, 0x40 },		{ REG_BLUE, 0x40 },
+			{ REG_RED, 0x60 },
+			{ REG_COM8, COM8_FASTAEC|COM8_AECSTEP|COM8_BFILT|COM8_AGC|COM8_AEC|COM8_AWB },
+
+			/* Matrix coefficients */
+			{ 0x4f, 0x80 },		{ 0x50, 0x80 },
+			{ 0x51, 0 },		{ 0x52, 0x22 },
+			{ 0x53, 0x5e },		{ 0x54, 0x80 },
+			{ 0x58, 0x9e },
+
+			{ REG_COM16, COM16_AWBGAIN },	{ REG_EDGE, 0 },
+			{ 0x75, 0x05 },		{ 0x76, 0xe1 },
+			{ 0x4c, 0 },		{ 0x77, 0x01 },
+			{ REG_COM13, 0xc3 },	{ 0x4b, 0x09 },
+			{ 0xc9, 0x60 },		{ REG_COM16, 0x38 },
+			{ 0x56, 0x40 },
+
+			{ 0x34, 0x11 },		{ REG_COM11, COM11_EXP|COM11_HZAUTO },
+			{ 0xa4, 0x88 },		{ 0x96, 0 },
+			{ 0x97, 0x30 },		{ 0x98, 0x20 },
+			{ 0x99, 0x30 },		{ 0x9a, 0x84 },
+			{ 0x9b, 0x29 },		{ 0x9c, 0x03 },
+			{ 0x9d, 0x4c },		{ 0x9e, 0x3f },
+			{ 0x78, 0x04 },
+
+			/* Extra-weird stuff.  Some sort of multiplexor register */
+			{ 0x79, 0x01 },		{ 0xc8, 0xf0 },
+			{ 0x79, 0x0f },		{ 0xc8, 0x00 },
+			{ 0x79, 0x10 },		{ 0xc8, 0x7e },
+			{ 0x79, 0x0a },		{ 0xc8, 0x80 },
+			{ 0x79, 0x0b },		{ 0xc8, 0x01 },
+			{ 0x79, 0x0c },		{ 0xc8, 0x0f },
+			{ 0x79, 0x0d },		{ 0xc8, 0x20 },
+			{ 0x79, 0x09 },		{ 0xc8, 0x80 },
+			{ 0x79, 0x02 },		{ 0xc8, 0xc0 },
+			{ 0x79, 0x03 },		{ 0xc8, 0x40 },
+			{ 0x79, 0x05 },		{ 0xc8, 0x30 },
+			{ 0x79, 0x26 },
+
+			{ 0xff, 0xff },	/* END MARKER */
+};
+/*
 const unsigned char OV7670_JPEG_INIT[][2] = { { 0xff, 0x00 }, { 0x2c, 0xff }, {
 		0x2e, 0xdf }, { 0xff, 0x01 }, { 0x3c, 0x32 }, { 0x11, 0x00 }, { 0x09,
 		0x02 }, { 0x04, 0x28 }, { 0x13, 0xe5 }, { 0x14, 0x48 }, { 0x2c, 0x0c },
@@ -55,15 +172,49 @@ const unsigned char OV7670_JPEG_INIT[][2] = { { 0xff, 0x00 }, { 0x2c, 0xff }, {
 				0x00 }, { 0x86, 0x3d }, { 0x50, 0x00 }, { 0x51, 0x2C }, { 0x52,
 				0x24 }, { 0x53, 0x00 }, { 0x54, 0x00 }, { 0x55, 0x00 }, { 0x5A,
 				0x2c }, { 0x5b, 0x24 }, { 0x5c, 0x00 }, { 0xff, 0xff }, };
+*/
 
-const unsigned char OV7670_YUV422[][2] = { { 0xFF, 0x00 }, { 0x05, 0x00 }, {
+/*
+const unsigned char OV7670_YUV422[][2] = {
+		{ 0xFF, 0x00 }, { 0x05, 0x00 }, {
 		0xDA, 0x10 }, { 0xD7, 0x03 }, { 0xDF, 0x00 }, { 0x33, 0x80 }, { 0x3C,
-		0x40 }, { 0xe1, 0x77 }, { 0x00, 0x00 }, { 0xff, 0xff }, };
+		0x40 }, { 0xe1, 0x77 }, { 0x00, 0x00 }, { 0xff, 0xff },
+};
+*/
+const unsigned char OV7670_YUV422[][2] = {
+		  { REG_COM7, 0x0 },  /* Selects YUV mode */
 
-const unsigned char OV7670_JPEG[][2] = { { 0xe0, 0x14 }, { 0xe1, 0x77 }, { 0xe5,
+		  { REG_RGB444, 0 },  /* No RGB444 please */
+
+		  { REG_COM1, 0 },
+
+		  { REG_COM15, COM15_R00FF },
+
+		  { REG_COM9, 0x6A }, /* 128x gain ceiling; 0x8 is reserved bit */
+
+		  { 0x4f, 0x80 },   /* "matrix coefficient 1" */
+
+		  { 0x50, 0x80 },   /* "matrix coefficient 2" */
+
+		  { 0x51, 0 },    /* vb */
+
+		  { 0x52, 0x22 },   /* "matrix coefficient 4" */
+
+		  { 0x53, 0x5e },   /* "matrix coefficient 5" */
+
+		  { 0x54, 0x80 },   /* "matrix coefficient 6" */
+
+		  { REG_COM13, COM13_UVSAT },
+
+		  { 0xff, 0xff },   /* END MARKER */
+};
+/*
+const unsigned char OV7670_JPEG[][2] = {
+		{ 0xe0, 0x14 }, { 0xe1, 0x77 }, { 0xe5,
 		0x1f }, { 0xd7, 0x03 }, { 0xda, 0x10 }, { 0xe0, 0x00 }, { 0xFF, 0x01 },
-		{ 0x04, 0x08 }, { 0xff, 0xff }, };
-
+		{ 0x04, 0x08 }, { 0xff, 0xff },
+};
+*/
 const unsigned char OV7670_160x120_JPEG[][2] = { { 0xFF, 0x01 }, { 0x12, 0x40 },
 		{ 0x17, 0x11 }, { 0x18, 0x43 }, { 0x19, 0x00 }, { 0x1a, 0x4b }, { 0x32,
 				0x09 }, { 0x4f, 0xca }, { 0x50, 0xa8 }, { 0x5a, 0x23 }, { 0x6d,
@@ -75,7 +226,7 @@ const unsigned char OV7670_160x120_JPEG[][2] = { { 0xFF, 0x01 }, { 0x12, 0x40 },
 				0x96 }, { 0x53, 0x00 }, { 0x54, 0x00 }, { 0x55, 0x00 }, { 0x57,
 				0x00 }, { 0x5a, 0x2c }, { 0x5b, 0x24 }, { 0x5c, 0x00 }, { 0xe0,
 				0x00 }, { 0xff, 0xff } };
-
+/*
 const unsigned char OV7670_320x240_JPEG[][2] = { { 0xff, 0x01 }, { 0x12, 0x40 },
 		{ 0x17, 0x11 }, { 0x18, 0x43 }, { 0x19, 0x00 }, { 0x1a, 0x4b }, { 0x32,
 				0x09 }, { 0x4f, 0xca }, { 0x50, 0xa8 }, { 0x5a, 0x23 }, { 0x6d,
@@ -87,6 +238,31 @@ const unsigned char OV7670_320x240_JPEG[][2] = { { 0xff, 0x01 }, { 0x12, 0x40 },
 				0x96 }, { 0x53, 0x00 }, { 0x54, 0x00 }, { 0x55, 0x00 }, { 0x57,
 				0x00 }, { 0x5a, 0x50 }, { 0x5b, 0x3c }, { 0x5c, 0x00 }, { 0xe0,
 				0x00 }, { 0xff, 0xff }, };
+*/
+const unsigned char OV7670_320x240_JPEG[][2] = {
+		  { REG_COM14, 0x19 },
+
+		  { 0x72, 0x11 },
+
+		  { 0x73, 0xf1 },
+
+
+		  { REG_HSTART, 0x16 },
+
+		  { REG_HSTOP, 0x04 },
+
+		  { REG_HREF, 0xa4 },
+
+		  { REG_VSTART, 0x02 },
+
+		  { REG_VSTOP, 0x7a },
+
+		  { REG_VREF, 0x0a },
+
+
+		  { 0xff, 0xff }, /* END MARKER */
+};
+
 
 const unsigned char OV7670_640x480_JPEG[][2] = { { 0xff, 0x01 }, { 0x11, 0x01 },
 		{ 0x12, 0x00 }, { 0x17, 0x11 }, { 0x18, 0x75 }, { 0x32, 0x36 }, { 0x19,
@@ -245,6 +421,7 @@ const unsigned char OV7670_LIGHT_MODE_HOME[][2] = { { 0xff, 0x00 },
 				0xff } };
 
 
+
 void OV7670_Init(I2C_HandleTypeDef *p_hi2c, DCMI_HandleTypeDef *p_hdcmi) {
 	phi2c = p_hi2c;
 	phdcmi = p_hdcmi;
@@ -256,16 +433,15 @@ void OV7670_Init(I2C_HandleTypeDef *p_hi2c, DCMI_HandleTypeDef *p_hdcmi) {
 	HAL_Delay(100);
 
 	// Software reset: reset all registers to default values
-	SCCB_Write(0xff, 0x01);
+	//SCCB_Write(0xff, 0x01);
 	SCCB_Write(0x12, 0x80);
-	HAL_Delay(100);
+	HAL_Delay(30);
+
 
 #ifdef DEBUG
-	uint8_t pid;
-	uint8_t ver;
-	SCCB_Read(0x0a, &pid);  // pid value is 0x26
-	SCCB_Read(0x0b, &ver);  // ver value is 0x42
-	my_printf("PID: 0x%x, VER: 0x%x\n", pid, ver);
+	uint8_t buffer[4];
+		 SCCB_Read(0x0b, buffer);
+		 printf("[OV7670] dev id = %02X\n", buffer[0]);
 #endif
 
 	// Stop DCMI clear buffer
@@ -303,13 +479,14 @@ void OV7670_ResolutionConfiguration(short opt) {
 #ifdef DEBUG
 	my_printf("Starting resolution choice \r\n");
 #endif
+	SCCB_Write(REG_COM3, 4);
 	OV7670_Configuration(OV7670_JPEG_INIT);
 	OV7670_Configuration(OV7670_YUV422);
-	OV7670_Configuration(OV7670_JPEG);
+	//OV7670_Configuration(OV7670_JPEG);
 	HAL_Delay(10);
-	SCCB_Write(0xff, 0x01);
+	//SCCB_Write(0xff, 0x01);
 	HAL_Delay(10);
-	SCCB_Write(0x15, 0x00);
+	//SCCB_Write(0x15, 0x00);
 
 	switch (opt) {
 	case 0:
@@ -338,6 +515,7 @@ void OV7670_ResolutionConfiguration(short opt) {
 #ifdef DEBUG
 	my_printf("Finalize configuration \r\n");
 #endif
+	SCCB_Write(0x11, 12);
 }
 
 void OV7670_Configuration(const unsigned char arr[][2]) {
@@ -383,9 +561,15 @@ void OV7670_StopDCMI(void) {
  */
 void OV7670_CaptureSnapshot(uint32_t frameBuffer, int length) {
 	HAL_DCMI_Start_DMA(phdcmi, DCMI_MODE_SNAPSHOT, frameBuffer, length);
+	//HAL_DCMI_Start_DMA(phdcmi, DCMI_MODE_CONTINUOUS, frameBuffer, length);
+
 	HAL_Delay(2000);
-	HAL_DCMI_Suspend(phdcmi);
-	HAL_DCMI_Stop(phdcmi);
+	//HAL_DCMI_Suspend(phdcmi);
+	//HAL_DCMI_Stop(phdcmi);
+
+	while(HAL_DCMI_GetState(phdcmi) == HAL_DCMI_STATE_BUSY) HAL_Delay(20);
+
+return;
 }
 
 /**
@@ -422,7 +606,7 @@ short SCCB_Read(uint8_t reg_addr, uint8_t *pdata) {
 	short opertionStatus = 0;
 	HAL_StatusTypeDef connectionStatus;
 	__disable_irq();
-	connectionStatus = HAL_I2C_Master_Transmit(phi2c, (uint16_t) 0x60,
+	connectionStatus = HAL_I2C_Master_Transmit(phi2c, (uint16_t) 0x42,
 			&reg_addr, 1, 100);
 	if (connectionStatus == HAL_OK) {
 		connectionStatus = HAL_I2C_Master_Receive(phi2c, (uint16_t) 0x43, pdata,
@@ -437,4 +621,17 @@ short SCCB_Read(uint8_t reg_addr, uint8_t *pdata) {
 	}
 	__enable_irq();
 	return opertionStatus;
+}
+
+void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
+{
+  printf("FRAME %d\n", HAL_GetTick());
+  /*
+  if(s_cbVsync)s_cbVsync(s_currentV);
+  if(s_destAddressForContiuousMode != 0) {
+    HAL_DMA_Start_IT(hdcmi->DMA_Handle, (uint32_t)&hdcmi->Instance->DR, s_destAddressForContiuousMode, OV7670_QVGA_WIDTH * OV7670_QVGA_HEIGHT/2);
+  }
+  s_currentV++;
+  s_currentH = 0;
+  */
 }

@@ -63,8 +63,8 @@ void Error_Handler(void);
 #define CAMERA_RESET_GPIO_Port GPIOE
 #define CAMERA_PWDN_Pin GPIO_PIN_8
 #define CAMERA_PWDN_GPIO_Port GPIOE
-#define DCMI_XCLK_Pin GPIO_PIN_8
-#define DCMI_XCLK_GPIO_Port GPIOA
+#define DCMI_XCLK_Pin GPIO_PIN_9
+#define DCMI_XCLK_GPIO_Port GPIOC
 /* USER CODE BEGIN Private defines */
 
 
