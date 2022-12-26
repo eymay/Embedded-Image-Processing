@@ -445,7 +445,7 @@ void OV7670_Init(I2C_HandleTypeDef *p_hi2c, DCMI_HandleTypeDef *p_hdcmi) {
 #endif
 
 	// Stop DCMI clear buffer
-	OV7670_StopDCMI();
+	//OV7670_StopDCMI();
 }
 
 void OV7670_ResolutionOptions(uint16_t opt) {
@@ -551,7 +551,7 @@ void OV7670_StopDCMI(void) {
 	my_printf("DCMI has been stopped \r\n");
 #endif
 	HAL_DCMI_Stop(phdcmi);
-	HAL_Delay(10); // If you get a DCMI error (data is not received), increase value to 30.
+	HAL_Delay(30); // If you get a DCMI error (data is not received), increase value to 30.
 }
 
 /**
@@ -567,7 +567,7 @@ void OV7670_CaptureSnapshot(uint32_t frameBuffer, int length) {
 	//HAL_DCMI_Suspend(phdcmi);
 	//HAL_DCMI_Stop(phdcmi);
 
-	while(HAL_DCMI_GetState(phdcmi) == HAL_DCMI_STATE_BUSY) HAL_Delay(200);
+	while(HAL_DCMI_GetState(phdcmi) == HAL_DCMI_STATE_BUSY) HAL_Delay(20);
 
 return;
 }

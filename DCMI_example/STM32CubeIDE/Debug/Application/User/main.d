@@ -30,9 +30,6 @@ Application/User/main.o: \
  ../../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h \
  ../../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
  ../../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- ../../Inc/libjpeg.h \
- ../../Middlewares/Third_Party/LibJPEG/include/jpeglib.h \
- ../../Inc/jconfig.h ../../Inc/jdata_conf.h ../../Inc/jmorecfg.h \
  ../../Inc/ov7670.h ../../Inc/main.h
 ../../Inc/main.h:
 ../../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
@@ -65,10 +62,5 @@ Application/User/main.o: \
 ../../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h:
 ../../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h:
 ../../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
-../../Inc/libjpeg.h:
-../../Middlewares/Third_Party/LibJPEG/include/jpeglib.h:
-../../Inc/jconfig.h:
-../../Inc/jdata_conf.h:
-../../Inc/jmorecfg.h:
 ../../Inc/ov7670.h:
 ../../Inc/main.h:

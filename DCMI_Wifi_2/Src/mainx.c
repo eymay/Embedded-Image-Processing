@@ -17,7 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
+#include "mainx.h"
 //#include "libjpeg.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -56,14 +56,14 @@ DMA_HandleTypeDef hdma_usart2_tx;
 
 
 uint8_t frameBuffer[15000] = { 0 };
-ushort mutex = 0;
+short mutex = 0;
 uint16_t bufferPointer = 0;
-ushort headerFound = 0;
+short headerFound = 0;
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void);
+//void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
@@ -97,7 +97,7 @@ void my_printf(const char *fmt, ...) // custom printf() function
   * @brief  The application entry point.
   * @retval int
   */
-int main(void)
+int mainx(void)
 {
   /* USER CODE BEGIN 1 */
 
@@ -114,10 +114,10 @@ int main(void)
   /* USER CODE END Init */
 
   /* Configure the system clock */
-  SystemClock_Config();
+ //SystemClock_Config();
 
 /* Configure the peripherals common clocks */
-  PeriphCommonClock_Config();
+  //PeriphCommonClock_Config();
 
   /* USER CODE BEGIN SysInit */
 
@@ -155,37 +155,9 @@ int main(void)
   {
 	  if (HAL_GPIO_ReadPin(BTN_GPIO_Port, BTN_Pin)) {
 	  			if (mutex == 1) {
-	  				memset(frameBuffer, 0, sizeof frameBuffer);
+	  				//memset(frameBuffer, 0, sizeof(frameBuffer));
 	  				OV7670_CaptureSnapshot((uint32_t) frameBuffer, 12672); // QCIF 176*144 /2 //OV7670_QVGA_WIDTH * OV7670_QVGA_HEIGHT/2
-	  				//HAL_Delay(10000);
-	  				/*
-	  				for(int i = 0; i < 11535; i++){
-	  					bufferPointer++;
-	  				}*/
-	  				/*
-	  				while (1) {
-	  					if (headerFound == 0 && frameBuffer[bufferPointer] == 0xFF
-	  							&& frameBuffer[bufferPointer + 1] == 0xD8) {
-	  						headerFound = 1;
-	  					#ifdef DEBUG
-	  						my_printf("Found header of JPEG file \r\n");
-	  					#endif
-	  					}
-	  					if (headerFound == 1 && frameBuffer[bufferPointer] == 0xFF
-	  							&& frameBuffer[bufferPointer + 1] == 0xD9) {
-	  						bufferPointer = bufferPointer + 2;
-	  					#ifdef DEBUG
-	  						my_printf("Found EOF of JPEG file \r\n");
-	  						#endif
-	  						headerFound = 0;
-	  						break;
-	  					}
-
-	  					if (bufferPointer >= 65535) {
-	  						break;
-	  					}
-	  					bufferPointer++;
-	  				}*/
+	  				
 	  					#ifdef DEBUG
 	  						my_printf("Image size: %d bytes \r\n",bufferPointer);
 	  					#endif
@@ -383,9 +355,11 @@ static void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA1_Stream6_IRQn interrupt configuration */
+  __NVIC_SetVector(DMA1_Stream6_IRQn , (uint32_t)&hdma_usart2_tx);
   HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
   /* DMA2_Stream1_IRQn interrupt configuration */
+  __NVIC_SetVector(DMA2_Stream1_IRQn , (uint32_t)&hdma_dcmi);
   HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
 
