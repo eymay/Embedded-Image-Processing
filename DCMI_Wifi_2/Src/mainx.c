@@ -55,7 +55,7 @@ DMA_HandleTypeDef hdma_usart2_tx;
 /* USER CODE BEGIN PV */
 
 
-uint8_t frameBuffer[15000] = { 0 };
+
 short mutex = 0;
 uint16_t bufferPointer = 0;
 short headerFound = 0;
@@ -151,6 +151,7 @@ int mainx(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  #if 0
   while (1)
   {
 	  if (HAL_GPIO_ReadPin(BTN_GPIO_Port, BTN_Pin)) {
@@ -169,10 +170,12 @@ int mainx(void)
 	  		} else {
 	  			mutex = 1;
 	  		}
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
+  #endif
   /* USER CODE END 3 */
 }
 
