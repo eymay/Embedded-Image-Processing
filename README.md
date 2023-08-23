@@ -8,7 +8,7 @@ processor. To communicate with the camera a proprietary interface
 \"Serial Camera Control Bus\" must be used. SCCB is similar to I2C with
 the exception of the device not sending ACK bit. This distinction can
 cause issues as discussed in Section 
-[4.1](#commCamera){reference-type="ref" reference="commCamera"}. Image
+[4.1](#communicating-with-the-camera). Image
 processing functions such as white balance, saturation and image format
 are programmable through SCCB. The camera supports RGB (565/555/444) and
 YCbCr (4:2:2) image formats according to its datasheet.
@@ -106,7 +106,7 @@ resolution greyscale image possible and downscale it further. These
 translated to our project to have a QCIF image of 176x144 pixels and
 downscale it by 4 from both width and height.
 
-## Communicating with the Camera {#commCamera}
+## Communicating with the Camera
 
 As a first test of getting image from the camera an Arduino UNO was
 used. Because the Arduino code was written using registers specific to
