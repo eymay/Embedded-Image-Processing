@@ -8,10 +8,10 @@ processor. To communicate with the camera a proprietary interface
 \"Serial Camera Control Bus\" must be used. SCCB is similar to I2C with
 the exception of the device not sending ACK bit. This distinction can
 cause issues as discussed in Section 
-[4.1](#communicating-with-the-camera). Image
+[Communicating with the Camera](#communicating-with-the-camera). Image
 processing functions such as white balance, saturation and image format
 are programmable through SCCB. The camera supports RGB (565/555/444) and
-YCbCr (4:2:2) image formats according to its datasheet.
+YCbCr (4:2:2) image formats according to its [datasheet](http://web.mit.edu/6.111/www/f2016/tools/OV7670_2006.pdf).
 
 ![Internal Diagram of OV7670](./res/Devices/ov7670internal.png)
 
@@ -19,7 +19,7 @@ YCbCr (4:2:2) image formats according to its datasheet.
 
 STM32F407 was used as the main microcontroller as it has DCMI (Digital
 Camera Interface) module in it. DCMI is a synchronous parallel data bus
-and works together with DMA [@dcmiDatasheet]. The synchronizing signals
+and works together with DMA (more on [DCMI](https://www.st.com/resource/en/application_note/an5020-digital-camera-interface-dcmi-on-stm32-mcus-stmicroelectronics.pdf)). The synchronizing signals
 of Camera such as PCLK, the horizontal and vertical reference signals
 are feed into DCMI. An allocated memory is filled with the incoming
 image data which is directed from DCMI to DMA.
@@ -29,15 +29,12 @@ version 5 and not in 6.
 
 # Architecture
 
-Figure [3](#fig_threaddiagram){reference-type="ref"
-reference="fig_threaddiagram"} depicts the algorithm consisting of two
-buffers and three threads that organizes the data from the camera for
-transmission to the electrodes. In the next subchapters, each thread
+Figure below depicts the architecture consisting of two
+buffers and three threads that collects the data from the camera. In the next subchapters, each thread
 will be studied and discussed under its own heading.
 
 ![Diagram of the processor
-algorithm](./res/Architecture/threaddiagram.png){#fig_threaddiagram
-width="50%"}
+algorithm](./res/Architecture/threaddiagram.png)
 
 ## Capture Thread
 
@@ -53,16 +50,13 @@ once to the full capacity.
 ## Processor Thread
 
 The processor thread maps the raw pixels in the frame buffer to a lower
-resolution in order to drive the electrodes. Then, it does the task of
+resolution. Then, it does the task of
 writing the current pixel values to the processed buffer. The lowest
 resolution image that can be captured with the camera model OV7670 is
 176x144 and contains 25344 pixels. Pixels in the raw image were divided
 into groups of 16 (4x4) and this value was reduced to a single pixel by
 averaging the values of 16 pixels. Therefore, the number of pixels has
-been reduced from 25344 to 1584. Thus, it is aimed to create a 44x36
-image in the brain by stimulating 1584 electrodes. If the number of
-electrodes is desired to be reduced further in the later stages of the
-project, the reduction amount in this thread can be rearranged.
+been reduced from 25344 to 1584. The reduction amount in this thread can be rearranged.
 
 Semaphore was used to manage the processed buffer between Processor
 Thread and Sender Thread. In MBED terms, processor thread releases the
@@ -103,7 +97,7 @@ healthy. The ideal pipeline can be summarised in steps as below:
 
 To realise the bionic eye project the requirement to get lowest
 resolution greyscale image possible and downscale it further. These
-translated to our project to have a QCIF image of 176x144 pixels and
+translated to the project to have a QCIF image of 176x144 pixels and
 downscale it by 4 from both width and height.
 
 ## Communicating with the Camera
@@ -112,10 +106,6 @@ As a first test of getting image from the camera an Arduino UNO was
 used. Because the Arduino code was written using registers specific to
 it, it could not be transfered to MBED OS easily. However, it was useful
 to see the camera working and making sure the sensor was not faulty.
-Figure[\[fig:firstCap\]](#fig:firstCap){reference-type="ref"
-reference="fig:firstCap"} shows the image from OV7670 and Figure
-[\[fig:firstCap_comp\]](#fig:firstCap_comp){reference-type="ref"
-reference="fig:firstCap_comp"} shows another image for comparison.
 
 Despite not using the code for the Arduino, it helped us to correct the
 focal length of the camera by tuning its lens and making sure it
@@ -138,10 +128,10 @@ Below you can see two figures one from OV7670 and the other a photo from a smart
 
 STM32 CubeMX programme was used to set pins and parameters of the
 microcontroller. DCMI was set as shown on Figure
-[5](#dcmiConf1){reference-type="ref" reference="dcmiConf1"}. Timing
+below. Timing
 diagrams and other work on OV7670 was used to check their values. It is
 worth noting that the settings for OV2640 was different than these which
-caused adapting a work on OV2640 harder [@SimpleMethod2023Jan]. This
+caused adapting a work on OV2640 harder than I thought. This
 work was used as base for the HAL implementation as it was simple and
 easy to understand. Its SCCB functions were able to write data to the
 camera unlike many I2C attempts.
@@ -149,7 +139,7 @@ camera unlike many I2C attempts.
 As the register values of OV2640 and OV7670 were diferent, the values in
 the previously mentioned work had to be replaced. Some values are known
 from the datasheet but some are not. A good source of default register
-values is the Linux kernel [@torvalds2023Jan]. The register values from
+values is the Linux [kernel](https://github.com/torvalds/linux/blob/master/drivers/media/i2c/ov7670.c) . The register values from
 the Kernel are used instead of the library's values.
 
 DMA was set to be from peripheral to memory with an increment option on
@@ -161,9 +151,7 @@ clock input of OV7670.
 
 At the end of integrating parameters and code from numerous sources and
 trying to implement the desired values from the documentation, we
-obtained data from DCMI, shown at Figure
-[6](#dcmiBytes){reference-type="ref" reference="dcmiBytes"}. However, as
-a group this is our first image processing project with a camera and we
+obtained data from DCMI, as shown below. However, I
 still did not know how to convert it to a visible image.
 
 ![First Image Bytes Obtained via DCMI at STM32
@@ -189,7 +177,7 @@ it in version 5 and then with STM32F407. Figuring out a continuous
 stream of data transmission via socket was tricky so I implemented an
 always connect first then send approach. If an error would rise, error
 handler will disconnect and reconnect back to revive the socket. This
-caused many disconnections at our server side almost at every data
+caused many disconnections at the server side almost at every data
 transmission.
 
 ## Viewing Image Bytes on PC
