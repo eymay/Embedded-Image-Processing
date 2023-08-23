@@ -24,7 +24,7 @@ of Camera such as PCLK, the horizontal and vertical reference signals
 are feed into DCMI. An allocated memory is filled with the incoming
 image data which is directed from DCMI to DMA.
 
-We were obliged to use MBED OS 5 as STM32F407 is only supported at
+I used MBED OS 5 as STM32F407 is only supported at
 version 5 and not in 6.
 
 # Architecture
@@ -175,18 +175,18 @@ The HAL implementation of DCMI, DMA, GPIO and I2C was ported to MBED OS.
 The system_clock file was updated to have the clock configuration of
 STM32. However, SCCB was not working as fast as it was on HAL and many
 write failures were rising. The clock signals were also not as clean as
-HAL in MBED. Despite MBED uses HAL beneath abstraction we could not
+HAL in MBED. Despite MBED uses HAL beneath abstraction I could not
 figure out why were the differences occuring.
 
-We believe it is possible to solve these issues with a deeper knowledge
+I believe it is possible to solve these issues with a deeper knowledge
 of MBED OS and could not find helpful knowledge on the internet so we
 moved on to complete the system from the server side.
 
 ## Sending Image Bytes
 
-The socket example was done on Nucleo Boards with MBED OS 6 so we tested
+The socket example was done on Nucleo Boards with MBED OS 6 so I tested
 it in version 5 and then with STM32F407. Figuring out a continuous
-stream of data transmission via socket was tricky so we implemented an
+stream of data transmission via socket was tricky so I implemented an
 always connect first then send approach. If an error would rise, error
 handler will disconnect and reconnect back to revive the socket. This
 caused many disconnections at our server side almost at every data
@@ -194,17 +194,17 @@ transmission.
 
 ## Viewing Image Bytes on PC
 
-We decided to make the PC server and the microcontroller as client in
+I decided to make the PC server and the microcontroller as client in
 socket connection. The server is written in Python. The received packets
 are appended and after a threshold the aggregated data is assumed to be
 an image. The data is read with OpenCV and displayed with Matplotlib.
 
 # Conclusion
 
-Within the scope of this study, we worked on a system that downscales
+Within the scope of this study, I worked on a system that downscales
 the raw images taken from the camera and transmits it via Wi-Fi. In the
-process we learned about interfacing with a device, getting large rates
+process I learned about interfacing with a device, getting large rates
 of data, managing it in embedded systems, interfacing with an external
-WiFi peripheral and sending data with sockets. We also learned about
+WiFi peripheral and sending data with sockets. I also learned about
 multithread operations, protecting a buffer, writing seemingly
 concurrent programmes and using processor resources more efficiently.
