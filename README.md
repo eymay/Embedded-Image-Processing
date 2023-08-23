@@ -27,6 +27,10 @@ image data which is directed from DCMI to DMA.
 I used MBED OS 5 as STM32F407 is only supported at
 version 5 and not in 6.
 
+Here is the pinout I used:
+![Pinout of STM](./res/pinout.png)
+
+
 # Architecture
 
 Figure below depicts the architecture consisting of two
