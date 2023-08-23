@@ -1,5 +1,9 @@
 
-# Devices
+# Embedded Image Processing
+
+This project aims to give an example of how an embedded image processing pipeline might work out. 
+In this case the embedded device receives image data, processes it and sends it to another device via sockets.
+
 
 ## OV7670 Camera
 
